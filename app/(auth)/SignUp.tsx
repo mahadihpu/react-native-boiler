@@ -1,17 +1,32 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, ToastAndroid } from "react-native";
 import React, { useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Colors from "@/data/Colors";
 import TextInputField from "@/components/shared/TextInputField";
 import Button from "@/components/shared/Button";
 import * as ImagePicker from "expo-image-picker";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/configs/FirebaseConfig";
 
 export default function SignUp() {
   const [profileImage, setProfileImage] = useState<string | undefined>("");
   const [fullName, setFullName] = useState<string | undefined>("");
   const [email, setEmail] = useState<string | undefined>("");
   const [password, setPassword] = useState<string | undefined>("");
-  const onBtnPress = () => {};
+  const onBtnPress = () => {
+    if(!email || !password || !fullName){
+      ToastAndroid.show("Please add all details", ToastAndroid.BOTTOM)
+      return
+    }
+    createUserWithEmailAndPassword(auth, email, password)
+    .then(userCreds => {
+      console.log(userCreds)
+    })
+    .catch(error => {
+      const errorMessage = error.message;
+      ToastAndroid.show(errorMessage, ToastAndroid.CENTER)
+    })
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
