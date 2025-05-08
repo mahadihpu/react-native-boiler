@@ -7,20 +7,42 @@ import Button from "@/components/shared/Button";
 import * as ImagePicker from "expo-image-picker";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/configs/FirebaseConfig";
+import {upload} from "cloudinary-react-native"
+import { cld, options } from "@/configs/CloudinaryConfig";
+import axios from "axios"
+import { useRouter } from "expo-router";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+
+const auth = getAuth();
+const db = getFirestore();
+
 
 export default function SignUp() {
   const [profileImage, setProfileImage] = useState<string | undefined>("");
   const [fullName, setFullName] = useState<string | undefined>("");
   const [email, setEmail] = useState<string | undefined>("");
   const [password, setPassword] = useState<string | undefined>("");
+  const router = useRouter()
   const onBtnPress = () => {
     if(!email || !password || !fullName){
       ToastAndroid.show("Please add all details", ToastAndroid.BOTTOM)
       return
     }
     createUserWithEmailAndPassword(auth, email, password)
-    .then(userCreds => {
+    .then(async(userCreds) => {
       console.log(userCreds)
+      //upload profile image
+      await upload(cld, {file: profileImage, options: options, callback: async (error: any, response: any) => {
+        if(error){
+          console.log(error)
+        }
+        if(response){
+          router.push("/landing")
+        }
+    }})
+      //save to database
     })
     .catch(error => {
       const errorMessage = error.message;
